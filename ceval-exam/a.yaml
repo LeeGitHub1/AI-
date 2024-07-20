@@ -1,0 +1,6 @@
+task_name: accountant
+type: classification
+data:
+  # train: /home/lmz/ceval-exam/train/accountant_train.csv
+  validation: /home/lmz/ceval-exam/val/accountant_val.csv
+  test: /home/lmz/ceval-exam/test/accountant_test.csv
