@@ -1,0 +1,27 @@
+task: myceval
+dataset_path: /home/lmz/ceval-exam/val/
+dataset_name: /home/lmz/ceval-exam/val.py # the dataset configuration to use. Leave `null` if your dataset does not require a config to be passed. See https://huggingface.co/docs/datasets/load_hub#configurations for more info.
+dataset_kwargs:
+  data_dir: 
+# training_split: <split name of training set, or `null`>
+# validation_split: <split name of val. set, or `null`>
+# test_split: <split name of test set, or `null`>
+
+# dataset_path: ceval/ceval-exam
+validation_split: val
+fewshot_split: dev
+fewshot_config:
+  sampler: first_n
+output_type: multiple_choice
+doc_to_text: "{{question.strip()}}\nA. {{A}}\nB. {{B}}\nC. {{C}}\nD. {{D}}\n答案："
+doc_to_choice: ["A", "B", "C", "D"]
+doc_to_target: "{{['A', 'B', 'C', 'D'].index(answer)}}"
+metric_list:
+  - metric: acc
+    aggregation: mean
+    higher_is_better: true
+  - metric: acc_norm
+    aggregation: mean
+    higher_is_better: true
+metadata:
+  version: 1.0
