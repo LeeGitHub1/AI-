@@ -1,0 +1,3 @@
+[submodule "GLM-4"]
+	path = GLM-4
+	url = https://github.com/THUDM/GLM-4.git

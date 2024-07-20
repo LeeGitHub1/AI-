@@ -1,0 +1,48 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "",
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "get_recommended_books",
+            "description": "Get recommended books based on user's interests",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "interests": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The interests to recommend books for"
+                }
+              },
+              "required": [
+                "interests"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Hi, I am looking for some book recommendations. I am interested in history and science fiction."
+    },
+    {
+      "role": "assistant",
+      "content": "{\"name\": \"get_recommended_books\", \"arguments\": {\"interests\": [\"history\", \"science fiction\"]}}"
+    },
+    {
+      "role": "observation",
+      "content": "{\"books\": [\"Sapiens: A Brief History of Humankind by Yuval Noah Harari\", \"A Brief History of Time by Stephen Hawking\", \"Dune by Frank Herbert\", \"The Martian by Andy Weir\"]}"
+    },
+    {
+      "role": "assistant",
+      "content": "Based on your interests in history and science fiction, I would recommend the following books: \"Sapiens: A Brief History of Humankind\" by Yuval Noah Harari, \"A Brief History of Time\" by Stephen Hawking, \"Dune\" by Frank Herbert, and \"The Martian\" by Andy Weir."
+    }
+  ]
+}
