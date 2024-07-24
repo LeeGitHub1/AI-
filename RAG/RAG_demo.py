@@ -4,6 +4,10 @@ from langchain_community.embeddings import ZhipuAIEmbeddings
 from dotenv import load_dotenv
 from pymilvus import Collection, CollectionSchema, FieldSchema, DataType, connections, utility
 import pandas as pd
+from langchain_community.vectorstores import Milvus
+from langchain.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.runnables import RunnablePassthrough
 
 app = Flask(__name__)
 
@@ -90,8 +94,40 @@ def search(collection, query_embedding, top_k=5):
     return results
 
 
+vectorstore = Milvus(
+    embedding_function=ZhipuAIEmbeddings(model="embedding-2"),
+    collection_name="big_create_demo",
+    connection_args={
+        "uri": os.environ.get("CLUSTER_ENDPOINT"),
+        "token": os.environ.get("TOKEN"),
+        "secure": True,
+    },
+    primary_field="id",
+    text_field="text",
+    vector_field="text_vector",
+)
+retriever = vectorstore.as_retriever(search_kwargs=dict(k=5))
+
+os.environ["OPENAI_API_KEY"] = os.environ.get("OPENAI_API_KEY")
+os.environ["OPENAI_API_BASE"] = os.environ.get("OPENAI_API_BASE")
+
+llm = ChatOpenAI()
+template = '''You are an assistant answering questions. Use the following retrieved context to answer the question. Include the original text in the reply if applicable. If you do not know the answer, say you do not know.
+Context: {context} 
+Question: {question} 
+Answer:'''
+prompt = PromptTemplate.from_template(template=template)
+
+# The RAG chain setup
+rag_chain = (
+    {"context": retriever, "question": RunnablePassthrough()}
+    | prompt
+    | llm
+)
+
+
 @app.route('/insert', methods=['POST'])
-def insert():
+def insert_api():
     data = request.json
     texts = data.get('texts', [])
     embeddings = get_zhipu_embeddings_docs(texts)
@@ -114,6 +150,14 @@ def search_api():
     results = search(collection, query_embedding[0], top_k=top_k)
     texts = [i.entity.get('text') for i in results[0]]
     return jsonify({'status': 'success', 'results': texts})
+
+
+@app.route('/answer', methods=['POST'])
+def answer_api():
+    data = request.json
+    question = data.get('question', '')
+    res = rag_chain.invoke(question)
+    return jsonify(res)
 
 
 if __name__ == '__main__':
